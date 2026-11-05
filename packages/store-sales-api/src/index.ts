@@ -4,4 +4,4 @@ export type {
   SalesTransaction,
   StoreSalesResponse,
 } from './sales'
-export { getDefaultSalesRange } from './sales'
+export { getDefaultSalesRange, paymentMethods, salesCategories } from './sales'

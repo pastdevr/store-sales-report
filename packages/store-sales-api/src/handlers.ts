@@ -11,7 +11,7 @@ function isValidDate(value: string | null): value is string {
   return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === value
 }
 
-export const storeSalesHandler = http.get('/api/stores/:storeId/sales', async ({ params, request }) => {
+export const storeSalesHandler = http.get('*/api/stores/:storeId/sales', async ({ params, request }) => {
   await delay(300 + Math.floor(Math.random() * 501))
 
   const storeId = String(params.storeId)
