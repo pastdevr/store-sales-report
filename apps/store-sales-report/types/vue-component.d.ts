@@ -1,16 +1,28 @@
 import type { DefineComponent } from 'vue'
+import type {
+  StoreSalesReportProps as Props,
+  StoreSalesReportVueEmits as VueEmits,
+} from '../src/types/report'
 
-export type ReportLocale = 'en' | 'es' | 'fr'
-export type ReportTheme = 'light' | 'dark'
+export type {
+  LoadErrorDetail,
+  ReportFilters,
+  ReportLocale,
+  ReportTheme,
+  StoreSalesReportDataLoadedDetail,
+  StoreSalesReportEventDetails,
+  StoreSalesReportProps,
+} from '../src/types/report'
 
-export interface StoreSalesReportProps {
-  storeId: string
-  language?: ReportLocale
-  from?: string
-  to?: string
-  theme?: ReportTheme
-}
-
-declare const StoreSalesReport: DefineComponent<StoreSalesReportProps>
+declare const StoreSalesReport: DefineComponent<
+  Props,
+  {},
+  {},
+  {},
+  {},
+  {},
+  {},
+  VueEmits
+>
 
 export default StoreSalesReport

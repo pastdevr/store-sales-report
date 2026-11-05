@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { getDefaultSalesRange, type StoreSalesResponse } from '@store-sales-report/data'
+import { getDefaultSalesRange } from '@store-sales-report/data'
 import ReportFilters from './ReportFilters.vue'
 import KpiCards from './KpiCards.vue'
 import DailyRevenueChart from './DailyRevenueChart.vue'
@@ -8,26 +8,25 @@ import CategoryRevenueTable from './CategoryRevenueTable.vue'
 import ReportNotice from './ReportNotice.vue'
 import { createWidgetI18n, normalizeLocale, provideWidgetI18n } from '../i18n/widget-i18n'
 import { isValidDateRange, aggregateSales } from '../utils/sales-aggregation'
-import type { LoadErrorDetail, PaymentFilter, ReportLocale, ReportTheme } from '../types/report'
+import type {
+  LoadErrorDetail,
+  PaymentFilter,
+  ReportFilters as ReportFilterValues,
+  ReportLocale,
+  StoreSalesReportEmits,
+  StoreSalesReportProps,
+  StoreSalesReportDataLoadedDetail,
+  ReportTheme,
+} from '../types/report'
 import { useStoreSales } from '../composables/useStoreSales'
 import '../styles/widget.css'
 
-const props = withDefaults(defineProps<{
-  storeId: string
-  language?: ReportLocale
-  from?: string
-  to?: string
-  theme?: ReportTheme
-}>(), {
+const props = withDefaults(defineProps<StoreSalesReportProps>(), {
   language: 'en',
   theme: 'light',
 })
 
-const emit = defineEmits<{
-  'data-loaded': [response: StoreSalesResponse]
-  'load-error': [detail: LoadErrorDetail]
-  'filters-change': [filters: { from: string; to: string; paymentMethod: PaymentFilter }]
-}>()
+const emit = defineEmits<StoreSalesReportEmits>()
 
 const defaultRange = getDefaultSalesRange()
 const from = ref(props.from ?? defaultRange.from)
@@ -55,11 +54,12 @@ const sales = useStoreSales({
 })
 
 watch([from, to, paymentMethod], () => {
-  emit('filters-change', { from: from.value, to: to.value, paymentMethod: paymentMethod.value })
+  const filters: ReportFilterValues = { from: from.value, to: to.value, paymentMethod: paymentMethod.value }
+  emit('filters-change', filters)
 })
 
 watch(sales.data, (response) => {
-  if (response) emit('data-loaded', response)
+  if (response) emit('data-loaded', response satisfies StoreSalesReportDataLoadedDetail)
 })
 
 sales.onFetchError(({ error, response, context }) => {

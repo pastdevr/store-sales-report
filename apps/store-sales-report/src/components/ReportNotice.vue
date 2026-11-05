@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useWidgetI18n } from '../i18n/widget-i18n'
+import type { ReportNoticeState } from '../types/report'
 
 defineProps<{
-  state: 'loading' | 'error' | 'empty' | 'invalid' | 'configuration'
+  state: ReportNoticeState
   message?: string
 }>()
 

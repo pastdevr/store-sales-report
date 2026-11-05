@@ -7,6 +7,7 @@
     "dist-web-component",
     "dist-vue",
     "types",
+    "src/types/report.ts",
     "README.md"
   ],
   "exports": {
