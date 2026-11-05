@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import ReportPlaceholder from './ReportPlaceholder.vue'
+import StoreSalesReport from './components/StoreSalesReport.vue'
 </script>
 
 <template>
   <main class="remote-preview">
-    <ReportPlaceholder />
+    <StoreSalesReport store-id="S-1042" language="en" theme="light" />
   </main>
 </template>

@@ -12,7 +12,7 @@ export default defineConfig({
       filename: 'remoteEntry.js',
       manifest: true,
       exposes: {
-        './vue': './src/ReportPlaceholder.vue',
+        './vue': './src/components/StoreSalesReport.vue',
       },
       shared: {
         vue: { singleton: true },
