@@ -45,7 +45,7 @@ Generate about 2,000 transactions over 30 days for at least two stores: one in U
 - The host page sets the starting language (en, es or fr); the store owner can switch it inside the widget
 - It works on desktop and laptop screens, from 1024 px to 1440 px wide
 
-### What the teams embedding it need
+## What the teams embedding it need
 
 - Add it in a few lines: as a Vue component in a Vue app, and as a Web Component (custom element) in a plain HTML page
 - Set the store, language, date range and a light or dark theme
