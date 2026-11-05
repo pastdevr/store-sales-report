@@ -12,6 +12,13 @@ npm install @store-sales-report/widget
 import '@store-sales-report/widget/web-component'
 ```
 
+The standalone Vue component is available from the `vue` subpath. Import its stylesheet as well when using the component package:
+
+```ts
+import StoreSalesReport from '@store-sales-report/widget/vue'
+import '@store-sales-report/widget/vue.css'
+```
+
 ```html
 <store-sales-report
   store-id="S-1042"
@@ -28,4 +35,4 @@ For a static HTML site without a bundler, copy `node_modules/@store-sales-report
 
 Listen for `data-loaded`, `load-error`, and `filters-change` events. They bubble across the Shadow DOM boundary and carry one object in `event.detail`.
 
-The package contains a self-contained browser bundle and does not require consumers to install Vue, the report's data workspace, or its chart/table libraries.
+The Web Component is a self-contained browser bundle and does not require consumers to install Vue, the report's data workspace, or its chart/table libraries. The Vue subpath uses the consumer's Vue peer dependency.

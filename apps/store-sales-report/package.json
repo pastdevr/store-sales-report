@@ -5,6 +5,7 @@
   "type": "module",
   "files": [
     "dist-web-component",
+    "dist-vue",
     "types",
     "README.md"
   ],
@@ -13,20 +14,34 @@
       "types": "./types/web-component.d.ts",
       "import": "./dist-web-component/store-sales-report.js",
       "default": "./dist-web-component/store-sales-report.js"
+    },
+    "./vue": {
+      "types": "./types/vue-component.d.ts",
+      "import": "./dist-vue/store-sales-report.js",
+      "default": "./dist-vue/store-sales-report.js"
+    },
+    "./vue.css": {
+      "import": "./dist-vue/store-sales-report.css",
+      "default": "./dist-vue/store-sales-report.css"
     }
   },
   "sideEffects": [
-    "./dist-web-component/store-sales-report.js"
+    "./dist-web-component/store-sales-report.js",
+    "./dist-vue/store-sales-report.css"
   ],
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4174",
     "build": "vue-tsc -b && vite build",
     "build:web-component": "vite build --config vite.web-component.config.ts",
-    "prepack": "npm run build:web-component",
+    "build:vue-component": "vite build --config vite.vue-component.config.ts",
+    "prepack": "npm run build:web-component && npm run build:vue-component",
     "preview": "vite preview --host 0.0.0.0 --port 4174"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.13"
   },
   "devDependencies": {
     "@tanstack/vue-table": "^9.3.1",
