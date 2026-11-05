@@ -6,7 +6,8 @@
   "packageManager": "npm@10.9.3",
   "workspaces": [
     "apps/host",
-    "apps/store-sales-report"
+    "apps/store-sales-report",
+    "packages/store-sales-api"
   ],
   "scripts": {
     "dev": "concurrently -k -n host,remote -c blue,green \"npm:dev:host\" \"npm:dev:remote\"",
