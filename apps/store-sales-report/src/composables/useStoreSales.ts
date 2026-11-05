@@ -1,37 +1,121 @@
-import { computed, toValue, watch, type MaybeRefOrGetter } from 'vue'
-import { useFetch } from '@vueuse/core'
-import type { StoreSalesResponse } from '@store-sales-report/data'
-import { getDefaultSalesRange } from '@store-sales-report/data'
+import { computed, toValue, type MaybeRefOrGetter } from 'vue'
+import { salesCategories, type SalesTransaction } from '@store-sales-report/data'
+import type {
+  CategoryRevenue,
+  DailyRevenue,
+  PaymentFilter,
+  ReportFilters,
+  SalesMetrics,
+} from '../types/report'
+import { useStoreSalesApi } from './useStoreSalesApi'
 
 export interface UseStoreSalesOptions {
   storeId: MaybeRefOrGetter<string>
-  from?: MaybeRefOrGetter<string>
-  to?: MaybeRefOrGetter<string>
-  enabled?: MaybeRefOrGetter<boolean>
+  from: MaybeRefOrGetter<string>
+  to: MaybeRefOrGetter<string>
+  paymentMethod: MaybeRefOrGetter<PaymentFilter>
+}
+
+interface AggregatedSales {
+  transactions: SalesTransaction[]
+  metrics: SalesMetrics
+  categories: CategoryRevenue[]
+  dailyRevenue: DailyRevenue[]
+}
+
+const roundMoney = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100
+
+function datesBetween(from: string, to: string): string[] {
+  const start = Date.parse(`${from}T00:00:00.000Z`)
+  const end = Date.parse(`${to}T00:00:00.000Z`)
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start > end) return []
+
+  const dates: string[] = []
+  for (let current = start; current <= end; current += 86_400_000) {
+    dates.push(new Date(current).toISOString().slice(0, 10))
+  }
+  return dates
+}
+
+function aggregateSales(
+  source: readonly SalesTransaction[],
+  filters: Pick<ReportFilters, 'from' | 'to' | 'paymentMethod'>,
+): AggregatedSales {
+  const inRange = source.filter((transaction) => {
+    const date = transaction.timestamp.slice(0, 10)
+    return date >= filters.from && date <= filters.to
+  })
+  const transactions = filters.paymentMethod === 'all'
+    ? inRange
+    : inRange.filter((transaction) => transaction.paymentMethod === filters.paymentMethod)
+
+  const revenue = roundMoney(transactions.reduce((total, transaction) => total + transaction.total, 0))
+  const metrics: SalesMetrics = {
+    revenue,
+    transactionCount: transactions.length,
+    averageBasketValue: transactions.length ? roundMoney(revenue / transactions.length) : 0,
+    itemsSold: transactions.reduce((total, transaction) => total + transaction.items, 0),
+  }
+
+  const categories: CategoryRevenue[] = salesCategories.map((category) => {
+    const categoryTransactions = transactions.filter((transaction) => transaction.category === category)
+    return {
+      category,
+      revenue: roundMoney(categoryTransactions.reduce((total, transaction) => total + transaction.total, 0)),
+      transactionCount: categoryTransactions.length,
+      itemsSold: categoryTransactions.reduce((total, transaction) => total + transaction.items, 0),
+    }
+  })
+
+  const dailyTotals = new Map<string, number>()
+  for (const transaction of transactions) {
+    const date = transaction.timestamp.slice(0, 10)
+    dailyTotals.set(date, (dailyTotals.get(date) ?? 0) + transaction.total)
+  }
+  const dailyRevenue = datesBetween(filters.from, filters.to).map((date) => ({
+    date,
+    revenue: roundMoney(dailyTotals.get(date) ?? 0),
+  }))
+
+  return { transactions, metrics, categories, dailyRevenue }
+}
+
+function isValidDateRange(from: string, to: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) return false
+  const fromDate = new Date(`${from}T00:00:00.000Z`)
+  const toDate = new Date(`${to}T00:00:00.000Z`)
+  if (!Number.isFinite(fromDate.valueOf()) || !Number.isFinite(toDate.valueOf())) return false
+  return fromDate.toISOString().slice(0, 10) === from
+    && toDate.toISOString().slice(0, 10) === to
+    && fromDate <= toDate
 }
 
 export function useStoreSales(options: UseStoreSalesOptions) {
-  const defaultRange = getDefaultSalesRange()
-  const url = computed(() => {
-    const from = options.from === undefined ? defaultRange.from : toValue(options.from)
-    const to = options.to === undefined ? defaultRange.to : toValue(options.to)
-    const query = new URLSearchParams({ from, to })
-
-    return `/api/stores/${encodeURIComponent(toValue(options.storeId))}/sales?${query}`
+  const storeId = computed(() => toValue(options.storeId))
+  const from = computed(() => toValue(options.from))
+  const to = computed(() => toValue(options.to))
+  const paymentMethod = computed(() => toValue(options.paymentMethod))
+  const hasStoreId = computed(() => Boolean(storeId.value.trim()))
+  const validRange = computed(() => isValidDateRange(from.value, to.value))
+  const api = useStoreSalesApi({
+    storeId,
+    from,
+    to,
+    enabled: computed(() => validRange.value && hasStoreId.value),
   })
 
-  const enabled = computed(() => options.enabled === undefined || toValue(options.enabled))
-  const request = useFetch(url, { immediate: false }).get().json<StoreSalesResponse>()
+  const aggregated = computed(() => aggregateSales(api.data.value?.transactions ?? [], {
+    from: from.value,
+    to: to.value,
+    paymentMethod: paymentMethod.value,
+  }))
+  const isEmpty = computed(() => Boolean(api.data.value) && aggregated.value.transactions.length === 0)
 
-  watch([url, enabled], ([, isEnabled]) => {
-    if (!isEnabled) {
-      request.abort()
-      return
-    }
-
-    if (request.canAbort.value) request.abort()
-    void request.execute()
-  }, { immediate: true })
-
-  return { ...request, requestUrl: url }
+  return {
+    ...api,
+    hasStoreId,
+    validRange,
+    aggregated,
+    isEmpty,
+  }
 }

@@ -7,16 +7,13 @@ import DailyRevenueChart from './DailyRevenueChart.vue'
 import CategoryRevenueTable from './CategoryRevenueTable.vue'
 import ReportNotice from './ReportNotice.vue'
 import { createWidgetI18n, normalizeLocale, provideWidgetI18n } from '../i18n/widget-i18n'
-import { isValidDateRange, aggregateSales } from '../utils/sales-aggregation'
 import type {
-  LoadErrorDetail,
   PaymentFilter,
   ReportFilters as ReportFilterValues,
   ReportLocale,
   StoreSalesReportEmits,
   StoreSalesReportProps,
   StoreSalesReportDataLoadedDetail,
-  ReportTheme,
 } from '../types/report'
 import { useStoreSales } from '../composables/useStoreSales'
 import '../styles/widget.css'
@@ -44,14 +41,13 @@ watch(() => props.language, (value) => {
   i18n.setLocale(selectedLocale.value)
 })
 
-const validRange = computed(() => isValidDateRange(from.value, to.value))
-const hasStoreId = computed(() => Boolean(props.storeId?.trim()))
 const sales = useStoreSales({
   storeId: computed(() => props.storeId),
   from,
   to,
-  enabled: computed(() => validRange.value && hasStoreId.value),
+  paymentMethod,
 })
+const { hasStoreId, validRange, aggregated, isEmpty } = sales
 
 watch([from, to, paymentMethod], () => {
   const filters: ReportFilterValues = { from: from.value, to: to.value, paymentMethod: paymentMethod.value }
@@ -72,12 +68,6 @@ sales.onFetchError(({ error, response, context }) => {
   })
 })
 
-const aggregated = computed(() => aggregateSales(sales.data.value?.transactions ?? [], {
-  from: from.value,
-  to: to.value,
-  paymentMethod: paymentMethod.value,
-}))
-const isEmpty = computed(() => Boolean(sales.data.value) && aggregated.value.transactions.length === 0)
 const languageOptions: Array<{ value: ReportLocale; label: string }> = [
   { value: 'en', label: 'English' },
   { value: 'es', label: 'Español' },

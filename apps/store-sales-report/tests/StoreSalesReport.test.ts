@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { StoreSalesResponse } from '@store-sales-report/data'
 import { getDefaultSalesRange } from '@store-sales-report/data'
 import StoreSalesReport from '../src/components/StoreSalesReport.vue'
-import { useStoreSales } from '../src/composables/useStoreSales'
+import { useStoreSales, type UseStoreSalesOptions } from '../src/composables/useStoreSales'
 import { StoreSalesReportElement } from '../src/web-component'
 
 const chartMock = vi.hoisted(() => {
@@ -30,7 +30,7 @@ const response: StoreSalesResponse = {
   ],
 }
 
-type RequestMock = {
+type SalesMock = {
   data: Ref<StoreSalesResponse | null>
   error: Ref<Error | null>
   isFetching: Ref<boolean>
@@ -40,15 +40,51 @@ type RequestMock = {
   execute: ReturnType<typeof vi.fn>
   abort: ReturnType<typeof vi.fn>
   onFetchError: ReturnType<typeof vi.fn>
+  hasStoreId: ComputedRef<boolean>
+  validRange: ComputedRef<boolean>
+  aggregated: ComputedRef<{
+    transactions: StoreSalesResponse['transactions']
+    metrics: { revenue: number; transactionCount: number; averageBasketValue: number; itemsSold: number }
+    categories: []
+    dailyRevenue: []
+  }>
+  isEmpty: ComputedRef<boolean>
 }
 const errorCallbacks: Array<(context: any) => void> = []
 
-function makeRequestMock() {
+function makeSalesMock(options: UseStoreSalesOptions): SalesMock {
   const data = ref<StoreSalesResponse | null>(null)
   const error = ref<Error | null>(null)
   const isFetching = ref(true)
   const aborted = ref(false)
   const requestUrl = computed(() => '/api/stores/S-1042/sales?from=2026-10-01&to=2026-10-30')
+  const from = computed(() => toValue(options.from))
+  const to = computed(() => toValue(options.to))
+  const paymentMethod = computed(() => toValue(options.paymentMethod))
+  const hasStoreId = computed(() => toValue(options.storeId).trim().length > 0)
+  const validRange = computed(() => from.value <= to.value)
+  const aggregated = computed(() => {
+    const transactions = (data.value?.transactions ?? []).filter((transaction) => {
+      const date = transaction.timestamp.slice(0, 10)
+      return date >= from.value && date <= to.value
+        && (paymentMethod.value === 'all' || transaction.paymentMethod === paymentMethod.value)
+    })
+    const revenue = Math.round(transactions.reduce((total, transaction) => total + transaction.total, 0) * 100) / 100
+    const itemsSold = transactions.reduce((total, transaction) => total + transaction.items, 0)
+
+    return {
+      transactions,
+      metrics: {
+        revenue,
+        transactionCount: transactions.length,
+        averageBasketValue: transactions.length ? Math.round(revenue / transactions.length * 100) / 100 : 0,
+        itemsSold,
+      },
+      categories: [] as [],
+      dailyRevenue: [] as [],
+    }
+  })
+  const isEmpty = computed(() => Boolean(data.value) && aggregated.value.transactions.length === 0)
   const execute = vi.fn(async () => {
     isFetching.value = true
     error.value = null
@@ -65,7 +101,11 @@ function makeRequestMock() {
     execute,
     abort: vi.fn(() => { aborted.value = true }),
     onFetchError,
-  }
+    hasStoreId,
+    validRange,
+    aggregated,
+    isEmpty,
+  } as unknown as SalesMock
 }
 
 function mountReport(props: { storeId: string; language?: 'en' | 'es' | 'fr'; from?: string; to?: string; theme?: 'light' | 'dark' } = { storeId: 'S-1042' }) {
@@ -81,13 +121,13 @@ function mountReport(props: { storeId: string; language?: 'en' | 'es' | 'fr'; fr
 }
 
 describe('StoreSalesReport', () => {
-  let requests: RequestMock[]
+  let requests: SalesMock[]
 
   beforeEach(() => {
     requests = []
     errorCallbacks.length = 0
-    mockedUseStoreSales.mockImplementation(() => {
-      const request = makeRequestMock()
+    mockedUseStoreSales.mockImplementation((options) => {
+      const request = makeSalesMock(options)
       requests.push(request)
       return request as unknown as ReturnType<typeof useStoreSales>
     })
