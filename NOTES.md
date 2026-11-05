@@ -28,15 +28,16 @@ Approximately 5 hours of implementation and verification to date, including the 
 
 - example of promt to refactor `StoreSalesReport.vue` component
     - purpose avoid busines logic placement in utils; consolide business logic inside one "feature" composable; introduce API resource layer
-    - prompt ```text
-        currently we have [useStoreSales.ts](apps/store-sales-report/src/composables/useStoreSales.ts) as composable to work with store sales API, wrapper around http client
-        it then used in [StoreSalesReport.vue](apps/store-sales-report/src/components/StoreSalesReport.vue) component directly
+    - prompt
+        ```text
+            currently we have [useStoreSales.ts](apps/store-sales-report/src/composables/useStoreSales.ts) as composable to work with store sales API, wrapper around http client
+            it then used in [StoreSalesReport.vue](apps/store-sales-report/src/components/StoreSalesReport.vue) component directly
 
-        can we switch to the following architecture useStoreSales composable becomes useStoreSalesApi, while sales state is managed inside new useStoreSales composable
-        utils [sales-aggregation.ts](apps/store-sales-report/src/utils/sales-aggregation.ts) moves to new composable
+            can we switch to the following architecture useStoreSales composable becomes useStoreSalesApi, while sales state is managed inside new useStoreSales composable
+            utils [sales-aggregation.ts](apps/store-sales-report/src/utils/sales-aggregation.ts) moves to new composable
 
-        then [StoreSalesReport.vue](apps/store-sales-report/src/components/StoreSalesReport.vue) referencing new component for using sales and reacting to updates
-    ``` 
+            then [StoreSalesReport.vue](apps/store-sales-report/src/components/StoreSalesReport.vue) referencing new component for using sales and reacting to updates
+        ``` 
 
 ## Implementation notes
 

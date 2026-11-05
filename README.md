@@ -46,16 +46,32 @@ The package provides a standalone Vue entry for applications that install it fro
 
 ```ts
 import StoreSalesReport from '@store-sales-report/widget/vue'
+import type {
+  LoadErrorDetail,
+  ReportFilters,
+  StoreSalesReportDataLoadedDetail,
+} from '@store-sales-report/widget/vue'
 import '@store-sales-report/widget/vue.css'
 ```
 
 ```vue
 <script setup lang="ts">
 import StoreSalesReport from 'storeSalesReport/vue'
+import type {
+  LoadErrorDetail,
+  ReportFilters,
+  StoreSalesReportDataLoadedDetail,
+} from '@store-sales-report/widget/vue'
 
-function onDataLoaded(response: unknown) { /* update host state */ }
-function onLoadError(error: unknown) { /* show host-level status */ }
-function onFiltersChange(filters: unknown) { /* synchronize host filters */ }
+function onDataLoaded(detail: StoreSalesReportDataLoadedDetail) {
+  console.log(`${detail.transactions.length} transactions for ${detail.storeId} (${detail.currency})`)
+}
+function onLoadError(detail: LoadErrorDetail) {
+  console.error(detail.status, detail.message)
+}
+function onFiltersChange(filters: ReportFilters) {
+  console.log(filters.from, filters.to, filters.paymentMethod)
+}
 </script>
 
 <template>
@@ -95,10 +111,12 @@ The package registers `<store-sales-report>`. In a bundled app, use the package 
 <script type="module" src="/assets/web-component.js"></script>
 <script type="module">
   document.querySelector('store-sales-report')?.addEventListener('data-loaded', (event) => {
-    console.log(event.detail) // StoreSalesResponse object
+    console.log(event.detail.storeId, event.detail.transactions.length)
   })
 </script>
 ```
+
+In TypeScript, the Web Component package declaration types `document.querySelector('store-sales-report')` as `StoreSalesReportElement` and its `data-loaded`, `load-error`, and `filters-change` listeners as `CustomEvent`s with the corresponding `StoreSalesReportEventDetails` payloads.
 
 ## Tests
 
