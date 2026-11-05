@@ -1,8 +1,19 @@
+<script setup lang="ts">
+import { useStoreSales } from './composables/useStoreSales'
+
+const { data, error, isFetching } = useStoreSales({ storeId: 'S-1042' })
+</script>
+
 <template>
-  <article class="report-placeholder">
-    <p class="eyebrow">Federated remote</p>
+  <article class="report-placeholder" aria-live="polite">
+    <p class="eyebrow">Federated remote · Data connection</p>
     <h2>Store Sales Report</h2>
-    <p>The widget will be implemented here.</p>
+    <p v-if="isFetching">Loading sales data…</p>
+    <p v-else-if="error" role="alert">Sales data could not be loaded: {{ error.message }}</p>
+    <p v-else-if="data">
+      Mock API connected for {{ data.storeId }} ({{ data.currency }}):
+      {{ data.transactions.length }} transactions loaded.
+    </p>
   </article>
 </template>
 
