@@ -1,11 +1,13 @@
 import { federation } from '@module-federation/vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
+    publicDir: fileURLToPath(new URL('../../packages/store-sales-api/public', import.meta.url)),
     plugins: [
       vue(),
       federation({

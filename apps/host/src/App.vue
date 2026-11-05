@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue'
+import { ref } from 'vue'
 
 const StoreSalesReport = defineAsyncComponent(() => import('storeSalesReport/vue'))
+const hostStatus = ref('Waiting for report data…')
+
+function onDataLoaded(response: { storeId: string; transactions: unknown[] }) {
+  hostStatus.value = `${response.transactions.length} transactions loaded for ${response.storeId}.`
+}
+
+function onLoadError(detail: { message: string }) {
+  hostStatus.value = detail.message
+}
 </script>
 
 <template>
@@ -14,11 +24,18 @@ const StoreSalesReport = defineAsyncComponent(() => import('storeSalesReport/vue
 
     <section class="widget-slot" aria-label="Store Sales Report widget">
       <Suspense>
-        <StoreSalesReport />
+        <StoreSalesReport
+          store-id="S-1042"
+          language="en"
+          theme="light"
+          @data-loaded="onDataLoaded"
+          @load-error="onLoadError"
+        />
         <template #fallback>
           <p class="status">Loading the Store Sales Report remote…</p>
         </template>
       </Suspense>
+      <p class="host-status" role="status">Host event: {{ hostStatus }}</p>
     </section>
   </main>
 </template>
