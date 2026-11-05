@@ -10,16 +10,17 @@
     "packages/store-sales-api"
   ],
   "scripts": {
+    "test": "vitest run --config apps/store-sales-report/vitest.config.ts",
     "dev": "concurrently -k -n host,remote -c blue,green \"npm:dev:host\" \"npm:dev:remote\"",
     "dev:host": "npm run dev --workspace @store-sales-report/host",
-    "dev:remote": "npm run dev --workspace @store-sales-report/remote",
+    "dev:remote": "npm run dev --workspace @store-sales-report/widget",
     "build": "npm run build:remote && npm run build:web-component && npm run build:host",
     "build:host": "npm run build --workspace @store-sales-report/host",
-    "build:remote": "npm run build --workspace @store-sales-report/remote",
-    "build:web-component": "npm run build:web-component --workspace @store-sales-report/remote",
+    "build:remote": "npm run build --workspace @store-sales-report/widget",
+    "build:web-component": "npm run build:web-component --workspace @store-sales-report/widget",
     "preview": "concurrently -k -n host,remote -c blue,green \"npm:preview:host\" \"npm:preview:remote\"",
     "preview:host": "npm run preview --workspace @store-sales-report/host",
-    "preview:remote": "npm run preview --workspace @store-sales-report/remote"
+    "preview:remote": "npm run preview --workspace @store-sales-report/widget"
   },
   "devDependencies": {
     "@vue/test-utils": "^2.5.1",

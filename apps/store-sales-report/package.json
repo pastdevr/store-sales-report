@@ -1,28 +1,44 @@
 {
-  "name": "@store-sales-report/remote",
-  "private": true,
+  "name": "@store-sales-report/widget",
   "version": "0.1.0",
+  "description": "Embeddable Store Sales Report Web Component",
   "type": "module",
+  "files": [
+    "dist-web-component",
+    "types",
+    "README.md"
+  ],
+  "exports": {
+    "./web-component": {
+      "types": "./types/web-component.d.ts",
+      "import": "./dist-web-component/store-sales-report.js",
+      "default": "./dist-web-component/store-sales-report.js"
+    }
+  },
+  "sideEffects": [
+    "./dist-web-component/store-sales-report.js"
+  ],
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4174",
     "build": "vue-tsc -b && vite build",
     "build:web-component": "vite build --config vite.web-component.config.ts",
+    "prepack": "npm run build:web-component",
     "preview": "vite preview --host 0.0.0.0 --port 4174"
   },
-  "dependencies": {
-    "@store-sales-report/data": "*",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
     "@tanstack/vue-table": "^9.3.1",
     "@vueuse/core": "^15.0.0",
     "echarts": "^6.1.0",
-    "vue": "^3.5.13",
-    "vue-i18n": "^11.4.18"
-  },
-  "devDependencies": {
     "@module-federation/vite": "^1.0.0",
     "@types/node": "^22.15.30",
     "@vitejs/plugin-vue": "^6.0.0",
     "typescript": "~5.8.3",
     "vite": "^7.0.0",
-    "vue-tsc": "^2.2.10"
+    "vue-tsc": "^2.2.10",
+    "vue": "^3.5.13",
+    "vue-i18n": "^11.4.18"
   }
 }
