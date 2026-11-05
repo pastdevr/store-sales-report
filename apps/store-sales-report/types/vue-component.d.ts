@@ -12,6 +12,7 @@ export type {
   StoreSalesReportDataLoadedDetail,
   StoreSalesReportEventDetails,
   StoreSalesReportProps,
+  StoreSalesReportVueEmits,
 } from '../src/types/report'
 
 declare const StoreSalesReport: DefineComponent<
