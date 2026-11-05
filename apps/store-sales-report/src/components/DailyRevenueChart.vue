@@ -32,7 +32,14 @@ function chartOptions(): EChartsCoreOption {
   return {
     animationDuration: 250,
     aria: { enabled: true },
-    grid: { left: 12, right: 20, top: 20, bottom: 8, containLabel: true },
+    grid: {
+      left: 12,
+      right: 20,
+      top: 20,
+      bottom: 8,
+      outerBoundsMode: 'same',
+      outerBoundsContain: 'axisLabel',
+    },
     tooltip: {
       trigger: 'axis',
       valueFormatter: (value: string | number) => formatter.format(Number(value)),
