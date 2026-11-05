@@ -2,13 +2,20 @@
 
 declare module 'storeSalesReport/vue' {
   import type { DefineComponent } from 'vue'
+  import type {
+    StoreSalesReportProps,
+    StoreSalesReportVueEmits,
+  } from '@store-sales-report/widget/vue'
 
-  const component: DefineComponent<{
-    storeId: string
-    language?: 'en' | 'es' | 'fr'
-    from?: string
-    to?: string
-    theme?: 'light' | 'dark'
-  }>
+  const component: DefineComponent<
+    StoreSalesReportProps,
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    StoreSalesReportVueEmits
+  >
   export default component
 }
