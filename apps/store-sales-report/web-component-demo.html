@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Store Sales Report Web Component Demo</title>
+    <style>
+      body { margin: 0; padding: 40px 24px; background: #f3f5f9; color: #172033; font: 16px system-ui, sans-serif; }
+      main { max-width: 1120px; margin: 0 auto; }
+      output { display: block; min-height: 1.5em; margin-bottom: 16px; color: #58647b; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Plain HTML embed</h1>
+      <output id="widget-events" aria-live="polite">Waiting for the widget…</output>
+      <store-sales-report store-id="S-1042" language="en" theme="light"></store-sales-report>
+    </main>
+    <script type="module" src="/src/web-component-demo.ts"></script>
+  </body>
+</html>
