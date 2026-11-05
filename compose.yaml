@@ -1,0 +1,20 @@
+services:
+  host:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: host
+      args:
+        VITE_STORE_SALES_REMOTE_ENTRY: http://localhost:8081/mf-manifest.json
+    ports:
+      - "8080:80"
+    depends_on:
+      - remote
+
+  remote:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: remote
+    ports:
+      - "8081:80"
